@@ -39,12 +39,15 @@
   hands.onResults(results => {
     if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
       const hand = results.multiHandLandmarks[0];
-      const wrist = hand[0]; // Titik pergelangan tangan
+      //const wrist = hand[0]; // Titik pergelangan tangan
+      const fingertip = hand[8]; // telunjuk
 
       // Ubah koordinat [0-1] jadi posisi di A-Frame
-      const x = (wrist.x - 0.5) * 4; // geser dan skala
-      const y = (0.5 - wrist.y) * 3 + 1.5;
+      const x = (fingertip.x - 0.5) * 4; // geser dan skala
+      const y = (0.5 - fingertip.y) * 3 + 1.5;
       boxEl.setAttribute('position', `${x} ${y} -3`);
+    
+
     }
   });
 
@@ -62,3 +65,4 @@
 
 </body>
 </html>
+
