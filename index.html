@@ -53,16 +53,36 @@
 
   // Akses kamera HP
   const videoElement = document.getElementById('input_video');
-  const camera = new Camera(videoElement, {
-    onFrame: async () => {
-      await hands.send({ image: videoElement });
-    },
+ // const camera = new Camera(videoElement, {
+  //  onFrame: async () => {
+   //   await hands.send({ image: videoElement });
+   // },
+  //  width: 640,
+  //  height: 480
+ // });
+  // Cari kamera belakang
+navigator.mediaDevices.getUserMedia({
+  video: {
+    facingMode: { exact: "environment" }, // pakai kamera belakang
     width: 640,
     height: 480
-  });
+  }
+}).then(stream => {
+  videoElement.srcObject = stream;
+  videoElement.play();
+
+  // Loop frame manual
+  async function processFrame() {
+    await hands.send({ image: videoElement });
+    requestAnimationFrame(processFrame);
+  }
+  processFrame();
+});
+  
   camera.start();
 </script>
 
 </body>
 </html>
+
 
