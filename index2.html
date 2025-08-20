@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Hand Tracking with Smartphone Camera</title>
+  <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"></script>
+</head>
+<body style="margin:0;">
+
+<!-- Pilih kamera -->
+<div style="position:fixed;top:10px;left:10px;z-index:10;background:#fff;padding:5px;">
+  <label for="cameraSelect">Pilih Kamera:</label>
+  <select id="cameraSelect"></select>
+</div>
+
+<!-- A-Frame scene -->
+<a-scene>
+  <a-box id="box" position="0 1.5 -3" color="red"></a-box>
+  <a-sky color="#ECECEC"></a-sky>
+</a-scene>
+
+<!-- Hidden video for camera input -->
+<video id="input_video" autoplay playsinline style="display:none;"></video>
+
+<script>
+  const boxEl = document.querySelector('#box');
+  const videoElement = document.getElementById('input_video');
+  const cameraSelect = document.getElementById('cameraSelect');
+
+  // MediaPipe Hands
+  const hands = new Hands({
+    locateFile: (file) => {
+      return `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`;
+    }
+  });
+  hands.setOptions({
+    maxNumHands: 1,
+    modelComplexity: 1,
+    minDetectionConfidence: 0.7,
+    minTrackingConfidence: 0.7
+  });
+
+  hands.onResults(results => {
+    if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
+      const hand = results.multiHandLandmarks[0];
+      const fingertip = hand[8]; // ujung telunjuk
+
+      // Normalisasi ke A-Frame
+      const x = (fingertip.x - 0.5) * 4;
+      const y = (0.5 - fingertip.y) * 3 + 1.5;
+      boxEl.setAttribute('position', `${x} ${y} -3`);
+    }
+  });
+
+  // ====== Kamera ======
+  async function listCameras() {
+    const devices = await navigator.mediaDevices.enumerateDevices();
+    const videoDevices = devices.filter(d => d.kind === 'videoinput');
+
+    cameraSelect.innerHTML = '';
+    videoDevices.forEach((device, idx) => {
+      const option = document.createElement('option');
+      option.value = device.deviceId;
+      option.text = device.label || `Camera ${idx+1}`;
+      cameraSelect.appendChild(option);
+    });
+
+    // cari kamera belakang
+    let backCam = videoDevices.find(d => 
+      d.label.toLowerCase().includes("back") || 
+      d.label.toLowerCase().includes("rear") || 
+      d.label.toLowerCase().includes("environment")
+    );
+
+    if (backCam) {
+      cameraSelect.value = backCam.deviceId;
+      startCamera(backCam.deviceId);
+    } else if (videoDevices.length > 0) {
+      cameraSelect.value = videoDevices[0].deviceId;
+      startCamera(videoDevices[0].deviceId);
+    }
+  }
+
+  async function startCamera(deviceId) {
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: { deviceId: { exact: deviceId }, width: 640, height: 480 }
+    });
+    videoElement.srcObject = stream;
+
+    // Loop frame manual
+    async function processFrame() {
+      await hands.send({ image: videoElement });
+      requestAnimationFrame(processFrame);
+    }
+    processFrame();
+  }
+
+  cameraSelect.addEventListener('change', () => {
+    startCamera(cameraSelect.value);
+  });
+
+  // Mulai
+  listCameras();
+</script>
+
+</body>
+</html>
