@@ -102,36 +102,36 @@
     }
   }
 
-//  async function startCamera(deviceId) {
-  //  const stream = await navigator.mediaDevices.getUserMedia({
-    //  video: { deviceId: { exact: deviceId }, width: 640, height: 480 }
-    //});
-   // videoElement.srcObject = stream;
-
-    //async function processFrame() {
-      //await hands.send({ image: videoElement });
-      //requestAnimationFrame(processFrame);
-   // }
-   // processFrame();
-   // videoElement.onloadeddata = () => {
-  //processFrame();
-//};
-
   async function startCamera(deviceId) {
-  const stream = await navigator.mediaDevices.getUserMedia({
-    video: { deviceId: { exact: deviceId }, width: 640, height: 480 }
-  });
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: { deviceId: { exact: deviceId }, width: 640, height: 480 }
+    });
+    videoElement.srcObject = stream;
 
-  videoElement.srcObject = stream;
-  videoElement.muted = true;
+   async function processFrame() {
+      await hands.send({ image: videoElement });
+      requestAnimationFrame(processFrame);
+    }
+    //processFrame();
+    videoElement.onloadeddata = () => {
+  processFrame();
+};
 
-  await videoElement.play().catch(() => {
-    console.warn("Autoplay blocked. User interaction needed.");
-  });
+//  async function startCamera(deviceId) {
+  //const stream = await navigator.mediaDevices.getUserMedia({
+    //video: { deviceId: { exact: deviceId }, width: 640, height: 480 }
+  //});
 
-  videoElement.onloadeddata = () => {
-    processFrame();
-  };
+  //videoElement.srcObject = stream;
+  //videoElement.muted = true;
+
+ // await videoElement.play().catch(() => {
+   // console.warn("Autoplay blocked. User interaction needed.");
+  //});
+
+  //videoElement.onloadeddata = () => {
+    //processFrame();
+  //};
 
   async function processFrame() {
     await hands.send({ image: videoElement });
