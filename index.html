@@ -16,7 +16,7 @@
   <a-sky color="#ECECEC"></a-sky>
 </a-scene>
 
-<!-- Hidden video for camera input -->
+<!-- video for camera input -->
 <video id="input_video" style="display:block;"></video>
 
 <script>
@@ -53,13 +53,13 @@
 
   // Akses kamera HP
   const videoElement = document.getElementById('input_video');
- // const camera = new Camera(videoElement, {
-  //  onFrame: async () => {
-   //   await hands.send({ image: videoElement });
-   // },
-  //  width: 640,
-  //  height: 480
- // });
+  const camera = new Camera(videoElement, {
+   onFrame: async () => {
+    await hands.send({ image: videoElement });
+  },
+   width: 640,
+   height: 480
+  });
   // Cari kamera belakang
 navigator.mediaDevices.getUserMedia({
   video: {
@@ -84,6 +84,7 @@ navigator.mediaDevices.getUserMedia({
 
 </body>
 </html>
+
 
 
 
