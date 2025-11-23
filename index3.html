@@ -22,8 +22,8 @@
 </a-scene>
 
 <!-- Hidden video untuk input kamera -->
-<!--video id="input_video" autoplay playsinline style="display:none;"></video-->
-<video id="input_video" autoplay playsinline style="width:0; height:0; opacity:0; position:absolute;"></video>
+<video id="input_video" autoplay playsinline style="display:block;"></video>
+<!--video id="input_video" autoplay playsinline style="width:0; height:0; opacity:0; position:absolute;"></video-->
 
 
 <!-- Canvas untuk menampilkan tangan -->
@@ -112,10 +112,10 @@
       await hands.send({ image: videoElement });
       requestAnimationFrame(processFrame);
     }
-    //processFrame();
-    videoElement.onloadeddata = () => {
-  processFrame();
-};
+    processFrame();
+   // videoElement.onloadeddata = () => {
+  //processFrame();
+//};
 
 //  async function startCamera(deviceId) {
   //const stream = await navigator.mediaDevices.getUserMedia({
