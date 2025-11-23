@@ -22,9 +22,7 @@
 </a-scene>
 
 <!-- Hidden video untuk input kamera -->
-<video id="input_video" autoplay playsinline style="display:block;"></video>
-<!--video id="input_video" autoplay playsinline style="width:0; height:0; opacity:0; position:absolute;"></video-->
-
+<video id="input_video" autoplay playsinline style="display:none;"></video>
 
 <!-- Canvas untuk menampilkan tangan -->
 <canvas id="output_canvas" 
@@ -75,4 +73,52 @@
   });
 
   // ====== Kamera ======
-  async function listCameras() { const devices = await navigator.mediaDevices.enumerateDevices(); const videoDevices = devices.filter(d => d.kind === 'videoinput'); cameraSelect.innerHTML = ''; videoDevices.forEach((device, idx) => { const option = document.createElement('option'); option.value = device.deviceId; option.text = device.label || Camera ${idx+1}; cameraSelect.appendChild(option); }); let backCam = videoDevices.find(d => d.label.toLowerCase().includes("back") || d.label.toLowerCase().includes("rear") || d.label.toLowerCase().includes("environment") ); if (backCam) { cameraSelect.value = backCam.deviceId; startCamera(backCam.deviceId); } else if (videoDevices.length > 0) { cameraSelect.value = videoDevices[0].deviceId; startCamera(videoDevices[0].deviceId); } } async function startCamera(deviceId) { const stream = await navigator.mediaDevices.getUserMedia({ video: { deviceId: { exact: deviceId }, width: 640, height: 480 } }); videoElement.srcObject = stream; async function processFrame() { await hands.send({ image: videoElement }); requestAnimationFrame(processFrame); } processFrame(); } cameraSelect.addEventListener('change', () => { startCamera(cameraSelect.value); }); listCameras(); </script> </body> </html>
+  async function listCameras() {
+    const devices = await navigator.mediaDevices.enumerateDevices();
+    const videoDevices = devices.filter(d => d.kind === 'videoinput');
+
+    cameraSelect.innerHTML = '';
+    videoDevices.forEach((device, idx) => {
+      const option = document.createElement('option');
+      option.value = device.deviceId;
+      option.text = device.label || `Camera ${idx+1}`;
+      cameraSelect.appendChild(option);
+    });
+
+    let backCam = videoDevices.find(d => 
+      d.label.toLowerCase().includes("back") || 
+      d.label.toLowerCase().includes("rear") || 
+      d.label.toLowerCase().includes("environment")
+    );
+
+    if (backCam) {
+      cameraSelect.value = backCam.deviceId;
+      startCamera(backCam.deviceId);
+    } else if (videoDevices.length > 0) {
+      cameraSelect.value = videoDevices[0].deviceId;
+      startCamera(videoDevices[0].deviceId);
+    }
+  }
+
+  async function startCamera(deviceId) {
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: { deviceId: { exact: deviceId }, width: 640, height: 480 }
+    });
+    videoElement.srcObject = stream;
+
+    async function processFrame() {
+      await hands.send({ image: videoElement });
+      requestAnimationFrame(processFrame);
+    }
+    processFrame();
+  }
+
+  cameraSelect.addEventListener('change', () => {
+    startCamera(cameraSelect.value);
+  });
+
+  listCameras();
+</script>
+
+</body>
+</html>
