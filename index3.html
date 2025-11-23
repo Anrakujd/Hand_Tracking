@@ -22,7 +22,9 @@
 </a-scene>
 
 <!-- Hidden video untuk input kamera -->
-<video id="input_video" autoplay playsinline style="display:none;"></video>
+<!--video id="input_video" autoplay playsinline style="display:none;"></video-->
+<video id="input_video" autoplay playsinline style="width:0; height:0; opacity:0; position:absolute;"></video>
+
 
 <!-- Canvas untuk menampilkan tangan -->
 <canvas id="output_canvas" 
@@ -100,17 +102,43 @@
     }
   }
 
-  async function startCamera(deviceId) {
-    const stream = await navigator.mediaDevices.getUserMedia({
-      video: { deviceId: { exact: deviceId }, width: 640, height: 480 }
-    });
-    videoElement.srcObject = stream;
+//  async function startCamera(deviceId) {
+  //  const stream = await navigator.mediaDevices.getUserMedia({
+    //  video: { deviceId: { exact: deviceId }, width: 640, height: 480 }
+    //});
+   // videoElement.srcObject = stream;
 
-    async function processFrame() {
-      await hands.send({ image: videoElement });
-      requestAnimationFrame(processFrame);
-    }
+    //async function processFrame() {
+      //await hands.send({ image: videoElement });
+      //requestAnimationFrame(processFrame);
+   // }
+   // processFrame();
+   // videoElement.onloadeddata = () => {
+  //processFrame();
+//};
+
+  async function startCamera(deviceId) {
+  const stream = await navigator.mediaDevices.getUserMedia({
+    video: { deviceId: { exact: deviceId }, width: 640, height: 480 }
+  });
+
+  videoElement.srcObject = stream;
+  videoElement.muted = true;
+
+  await videoElement.play().catch(() => {
+    console.warn("Autoplay blocked. User interaction needed.");
+  });
+
+  videoElement.onloadeddata = () => {
     processFrame();
+  };
+
+  async function processFrame() {
+    await hands.send({ image: videoElement });
+    requestAnimationFrame(processFrame);
+  }
+}
+
   }
 
   cameraSelect.addEventListener('change', () => {
